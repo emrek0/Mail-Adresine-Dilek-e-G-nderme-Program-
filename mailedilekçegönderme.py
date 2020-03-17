@@ -42,6 +42,6 @@ mail.ehlo ()
 
 mail.starttls ()
 
-mail.login ("baglanılacakmail@gmail.com", "")
+mail.login ("baglanılacakmail@gmail.com")
 
 mail.sendmail ("gönderenmail.gmail.com", "alıcı@gmail.com", content)
