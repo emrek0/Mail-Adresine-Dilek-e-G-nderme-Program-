@@ -1,0 +1,128 @@
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.Qt import QApplication, QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout, QMessageBox
+import smtplib
+
+class Ui_MainWindow(object):
+    def setupUi(self, MainWindow):
+        MainWindow.setObjectName("MainWindow")
+        MainWindow.resize(528, 496)
+        MainWindow.setStyleSheet("rgb{(137, 52, 255)}")
+        self.centralwidget = QtWidgets.QWidget(MainWindow)
+        self.centralwidget.setObjectName("centralwidget")
+        self.mailadresi = QtWidgets.QLineEdit(self.centralwidget)
+        self.mailadresi.setGeometry(QtCore.QRect(20, 70, 281, 21))
+        self.mailadresi.setObjectName("mailadresi")
+        self.mailadresi.setPlaceholderText("Mail Adresinizi Girin")
+        self.mailsifre = QtWidgets.QLineEdit(self.centralwidget)
+        self.mailsifre.setGeometry(QtCore.QRect(20, 110, 281, 20))
+        self.mailsifre.setObjectName("mailsifre")
+        self.mailsifre.setPlaceholderText("Şifrenizi girin")
+        self.mailsifre.setEchoMode(QLineEdit.Password)
+        self.mesajkonusu = QtWidgets.QLineEdit(self.centralwidget)
+        self.mesajkonusu.setGeometry(QtCore.QRect(20, 190, 281, 21))
+        self.mesajkonusu.setObjectName("mesajkonusu")
+        self.mesajkonusu.setPlaceholderText("Mesajın konusunu girin")
+        self.mesaj = QtWidgets.QTextEdit(self.centralwidget)
+        self.mesaj.setGeometry(QtCore.QRect(20, 230, 281, 181))
+        self.mesaj.setObjectName("mesaj")
+        self.mesaj.setPlaceholderText("Mesajınızı buraya yazın")
+        self.alicimail = QtWidgets.QLineEdit(self.centralwidget)
+        self.alicimail.setGeometry(QtCore.QRect(20, 150, 281, 21))
+        self.alicimail.setObjectName("alicimail")
+        self.alicimail.setPlaceholderText("Alıcı adresini buraya yazın")
+        self.Gonder = QtWidgets.QPushButton(self.centralwidget)
+        self.Gonder.setGeometry(QtCore.QRect(320, 370, 131, 41))
+        self.Gonder.setMaximumSize(QtCore.QSize(131, 16777215))
+        self.Gonder.setStyleSheet("qlineargradient{(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0 rgba(0, 0, 0, 255), stop:1 rgba(255, 255, 255, 255))}")
+        self.Gonder.setObjectName("Gonder")
+
+
+        self.temizle = QtWidgets.QPushButton(self.centralwidget)
+        self.temizle.setGeometry(QtCore.QRect(320, 410, 131, 41))
+        self.temizle.setMaximumSize(QtCore.QSize(131, 16777215))
+        self.temizle.setStyleSheet("qlineargradient{(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0 rgba(0, 0, 0, 255), stop:1 rgba(255, 255, 255, 255))}")
+        self.temizle.setObjectName("Temizle")
+
+
+
+
+
+        self.progressBar = QtWidgets.QProgressBar(self.centralwidget)
+        self.progressBar.setGeometry(QtCore.QRect(320, 330, 171, 23))
+
+        self.progressBar.setProperty("value", 0)
+        self.progressBar.setObjectName("progressBar")
+
+        self.label = QtWidgets.QLabel(self.centralwidget)
+        self.label.setGeometry(QtCore.QRect(50, 10, 231, 41))
+        font = QtGui.QFont()
+        font.setFamily("Consolas")
+        font.setPointSize(11)
+        font.setBold(True)
+        font.setWeight(75)
+        self.label.setFont(font)
+        self.label.setAlignment(QtCore.Qt.AlignCenter)
+        self.label.setObjectName("label")
+        MainWindow.setCentralWidget(self.centralwidget)
+        self.statusbar = QtWidgets.QStatusBar(MainWindow)
+        self.statusbar.setObjectName("statusbar")
+        MainWindow.setStatusBar(self.statusbar)
+        self.Gonder.clicked.connect(lambda :self.gonder(self.mailadresi, self.mailsifre, self.mesajkonusu, self.mesaj, self.alicimail, self.progressBar))
+        self.temizle.clicked.connect(self.sifirla)
+        self.retranslateUi(MainWindow)
+        QtCore.QMetaObject.connectSlotsByName(MainWindow)
+
+    def sifirla(self):
+        self.mailadresi.clear()
+        self.mailsifre.clear()
+        self.mesajkonusu.clear()
+        self.mesaj.clear()
+        self.alicimail.clear()
+        self.progressBar.setProperty("value", 0)
+
+
+
+    def gonder(self,mailadresi,mailsifre,mesajkonusu,mesaj,alicimail, progressBar):
+        msj=MIMEMultipart()
+        msj['From']='ME'
+        msj['To']=alicimail.text()
+        msj['Subject']=mesajkonusu.text()
+
+        body = MIMEText(mesaj.toPlainText(), 'plain')
+        msj.attach(body)
+
+        try:
+            mail=smtplib.SMTP("smtp.gmail.com", 587)
+            mail.ehlo()
+            mail.starttls()
+            mail.login(mailadresi.text(), mailsifre.text())
+            mail.sendmail(msj["from"], msj["To"], msj.as_string())
+
+            self.progressBar.setProperty("value", 100)
+
+
+            mail.close()
+        except:
+            sys.stderr.write("Bir problem oluştu....")
+            sys.stderr.flush()
+
+
+
+    def retranslateUi(self, MainWindow):
+        _translate = QtCore.QCoreApplication.translate
+        MainWindow.setWindowTitle(_translate("MainWindow", "Arayüzle Mail Gönderme Programı"))
+        self.Gonder.setText(_translate("MainWindow", "Gönder"))
+        self.temizle.setText(_translate("MainWindow", "Temizle"))
+        self.label.setText(_translate("MainWindow", "MAİL GÖNDERME PROGRAMI"))
+
+
+if __name__ == "__main__":
+    import sys
+    app = QtWidgets.QApplication(sys.argv)
+    MainWindow = QtWidgets.QMainWindow()
+    ui = Ui_MainWindow()
+    ui.setupUi(MainWindow)
+    MainWindow.show()
+    sys.exit(app.exec_())
